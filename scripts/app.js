@@ -71,12 +71,11 @@ function initMap() {
         zoom: 12,
         styles: styles,
         mapTypeControl: false,
-        panControl: false
     });
 
-    var largeInfowindow = new google.maps.InfoWindow();
+    var largeInfowindow = new google.maps.InfoWindow({maxWidth: 300});
 
-    var mapMarkers = new google.maps.Marker(
+    /*var mapMarkers = new google.maps.Marker(
       {
         map: map,
         position: position,
@@ -85,7 +84,7 @@ function initMap() {
         animation: google.maps.Animation.DROP,
         id:  i
       }
-    );
+    );*/
 }
 
 var ViewModel = function () {

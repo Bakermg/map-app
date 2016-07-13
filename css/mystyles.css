@@ -1,8 +1,23 @@
 html,
-body,
-#map {
+body {
   font-family: monospace;
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+#map {
+  position: absolute;;
+  bottom: 0px;
+  height: 100%;
+  width: 100%;
+}
+
+.search-bar {
+  position: absolute;
+  background-color: lightgray;
+  text-align: center;
+  padding: 5px;
+  left: 2%;
+  opacity: 0.8;
 }
