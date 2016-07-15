@@ -71,7 +71,15 @@ function initMap() {
         zoom: 12,
         styles: styles,
         mapTypeControl: false,
-    });
+    }
+
+  );
+
+  google.maps.event.addDomListener(window, "resize" , function() {
+    var center = map.getCenter();
+    google.maps.event.trigger(map, "resize");
+    map.setCenter(center);
+  });
 
     var largeInfowindow = new google.maps.InfoWindow({maxWidth: 300});
 

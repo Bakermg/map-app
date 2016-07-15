@@ -7,17 +7,15 @@ body {
 }
 
 #map {
-  position: absolute;;
-  bottom: 0px;
   height: 100%;
-  width: 100%;
 }
 
-.search-bar {
+.search {
   position: absolute;
   background-color: lightgray;
   text-align: center;
-  padding: 5px;
-  left: 2%;
+  padding: 15px 10px;
+  left: 10px;
+  top: 25px;
   opacity: 0.8;
 }
