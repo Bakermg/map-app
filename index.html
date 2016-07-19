@@ -3,26 +3,28 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Map application</title>
+    <title>Get Running in Your City</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/mystyles.css">
 </head>
 
 <body>
-        <div id="map"></div>
+    <div id="map"></div>
 
-        <div class="search">
-            <form data-bind="submit: ">
-                <input type="text" placeholder="">
-                <input type="submit" value="Search" id="submit">
-            </form>
-
-        </div>
+    <div class="search container-fluid">
+        <form>
+            <input type="text" placeholder="Enter Your City">
+            <input type="submit" value="Search" id="submit">
+        </form>
+        <form>
+            <input type="text" placeholder="Search by event">
+            <input type="submit" value="Search" id="submit">
+        </form>
+    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?libraries=places&v=3&key=AIzaSyCPAgVGmjpc4LC6NkdDw9HO_MzX0_8l_2M"></script>
     <script type="text/javascript" src="scripts/knockout-3.2.0.js"></script>
     <script type="text/javascript" src="scripts/app.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyCPAgVGmjpc4LC6NkdDw9HO_MzX0_8l_2M&callback=initMap"></script>
 </body>
-
 </html>
