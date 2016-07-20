@@ -1,6 +1,6 @@
  function ViewModel() {
   var self = this;
-  var map, city, infowindow;
+  var map,city,infowindow;
 
   this.activeEvents = ko.observable([]); //List of events
   this.mapMarkers = ko.observable([]); //All Map Marker
@@ -81,7 +81,7 @@
     }];
 
 
-     city = new google.maps.LatLng(26.09951, -80.38377);
+     city = {lat: 26.09951,lng: -80.38377};
      map = new google.maps.Map(document.getElementById('map'), {
         center: city,
         zoom: 11,
@@ -100,15 +100,32 @@
     });
 
      infowindow = new google.maps.InfoWindow({maxWidth: 300});
-
+     initMap();
 }
 
 // Use API to get events data
   function getEvents(location) {
-    var activeURL = "http://api.amp.active.com/v2/search?query=running&category=event&radius=50&zip="+zip+"&start_date="+date+"api_key=uq2yyhkfewq9j2te9j754g6g";
+    var zips = location;
+
+// Use this function to format the date for the url
+    Date.prototype.defaultView=function(){
+      var dd=this.getDate();
+      if(dd<10)dd='0'+dd;
+      var mm=this.getMonth()+1;
+      if(mm<10)mm='0'+mm;
+      var yyyy=this.getFullYear();
+      return String(yyyy+"-"+mm+"-"+dd)
+    }
+    var today = new Date();
+    var dated =today.defaultView();
+
+    var activeURL = "http://api.amp.active.com/v2/search?query=running&category=event&start_date="+dated+"..&zip="+zips+"&radius=50&api_key=uq2yyhkfewq9j2te9j754g6g";
+    alert(activeURL);
   }
 
-  initMap();
-}
 
-ko.applyBindings(new ViewModel());
+  getEvents(33327);
+
+
+}
+  ko.applyBindings(new ViewModel());
