@@ -22,6 +22,12 @@
             <input type="submit" value="Search" id="submit">
         </form>
     </div>
+    <div class="results-list">
+      <div>
+        <h2 class="status-message" data-bind="text: activeStatus"></h2>
+        <ul class="results"></ul>
+      </div>
+    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?libraries=places&v=3&key=AIzaSyCPAgVGmjpc4LC6NkdDw9HO_MzX0_8l_2M"></script>
     <script type="text/javascript" src="scripts/knockout-3.2.0.js"></script>

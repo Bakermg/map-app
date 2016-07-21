@@ -3,6 +3,7 @@
   var map,city,infowindow;
 
   this.activeEvents = ko.observable([]); //List of events
+  this.activeStatus = ko.observable('Searching for events near you');
   this.mapMarkers = ko.observable([]); //All Map Marker
   this.filterlist = ko.observable([]); //Filtered list
   this.numberOfEvents = ko.computed(function() {
@@ -116,16 +117,29 @@
       var yyyy=this.getFullYear();
       return String(yyyy+"-"+mm+"-"+dd)
     }
+  // Get current date from user and format for url string
     var today = new Date();
     var dated =today.defaultView();
 
-    var activeURL = "http://api.amp.active.com/v2/search?query=running&category=event&start_date="+dated+"..&zip="+zips+"&radius=50&api_key=uq2yyhkfewq9j2te9j754g6g";
-    alert(activeURL);
+    var activeURL = "http://api.amp.active.com/v2/search?query=Running&cb=displayResults&start_date="+dated+"..&zip="+zips+"&radius=50&api_key=uq2yyhkfewq9j2te9j754g6g";
+
+    $.ajax({
+      url: activeURL,
+      jsonp: 'displayResults',
+      dataType: 'jsonp',
+      success: function() {
+        alert('sucess');
+        console.log(data);
+      },
+      error: function() {
+        alert('Somethin went wrong please reload the page');
+      }
+    });
   }
 
 
   getEvents(33327);
 
-
+  //initMap();
 }
   ko.applyBindings(new ViewModel());
