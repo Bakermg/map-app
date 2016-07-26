@@ -14,22 +14,22 @@
 
     <div class="search container-fluid">
         <form>
-            <input type="text" placeholder="Enter Your Zipcode">
-            <input type="submit" value="Search" id="submit">
+            <input id="address" type="text" placeholder="Enter Your Zipcode" >
+
         </form>
         <form>
-            <input type="text" placeholder="Search by event">
-            <input type="submit" value="Search" id="submit">
+            <input id="query" type="text" placeholder="Search Topic">
+            <input id="submit" type="button" value="Search">
         </form>
     </div>
     <div class="results-list">
       <div>
         <h2 class="status-message" data-bind="text: activeStatus"></h2>
-        <ul class="results"></ul>
+        <ul class="results" data-bind="foreach:"></ul>
       </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?libraries=places&v=3&key=AIzaSyCPAgVGmjpc4LC6NkdDw9HO_MzX0_8l_2M"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyCPAgVGmjpc4LC6NkdDw9HO_MzX0_8l_2M"></script>
     <script type="text/javascript" src="scripts/knockout-3.2.0.js"></script>
     <script type="text/javascript" src="scripts/app.js"></script>
 </body>

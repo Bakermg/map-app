@@ -1,20 +1,7 @@
- function ViewModel() {
+function ViewModel() {
+
   var self = this;
-  var map,city,infowindow;
-
-  this.activeEvents = ko.observable([]); //List of events
-  this.activeStatus = ko.observable('Searching for events near you');
-  this.mapMarkers = ko.observable([]); //All Map Marker
-  this.filterlist = ko.observable([]); //Filtered list
-  this.numberOfEvents = ko.computed(function() {
-    return self.filterlist().length;
-  });
-
-
-//Error handling if Google Maps fails to load
-  this.mapRequestTimeout = setTimeout(function() {
-    $('#map-canvas').html('Google Maps failed to load Please refresh your browser.');
-  }, 8000);
+  var map, infowindow, area, city, search;
 
 // Initialize Google map
  function initMap() {
@@ -81,8 +68,52 @@
         "featureType": "road"
     }];
 
+      //create new map with inintail location
+      city = {lat: 26.09951, lng: -80.38377};
 
-     city = {lat: 26.09951,lng: -80.38377};
+       map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 13,
+          styles: styles,
+          center: city
+        });
+        var geocoder = new google.maps.Geocoder();
+
+        document.getElementById('submit').addEventListener('click', function() {
+          geocodeAddress(geocoder, map);
+          city = $('#address').value;
+          search = $('#query').value;
+        });
+
+
+    }
+
+
+    //use google geocoder to get lat and long for city
+
+      function geocodeAddress(geocoder, resultsMap) {
+        var address = document.getElementById('address').value;
+        geocoder.geocode({'address': address}, function(results, status) {
+          if (status === google.maps.GeocoderStatus.OK) {
+            resultsMap.setCenter(results[0].geometry.location);
+             var lat = results[0].geometry.location.lat();
+             var lng = results[0].geometry.location.lng();
+             getEvents(city,search);
+            var marker = new google.maps.Marker({
+              map: resultsMap,
+              position: results[0].geometry.location,
+              animation: google.maps.Animation.DROP
+            });
+
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+
+        });
+
+      }
+
+
+    /* city = {lat: 26.09951,lng: -80.38377};
      map = new google.maps.Map(document.getElementById('map'), {
         center: city,
         zoom: 11,
@@ -101,12 +132,58 @@
     });
 
      infowindow = new google.maps.InfoWindow({maxWidth: 300});
-     initMap();
-}
 
+
+
+        document.getElementById('submit').addEventListener('click', function() {
+          geocodeAddress(geocoder, map);
+        });
+
+
+}
+  var geocoder = new google.maps.Geocoder();
+  var lat = '';
+  var lng = '';
+  var address = document.getElementById('location').value;
+  geocoder.geocode( { 'address': address}, function(results, status) {
+  if (status == google.maps.GeocoderStatus.OK) {
+     lat = results[0].geometry.location.lat();
+     lng = results[0].geometry.location.lng();
+    }
+   else {
+    alert("Geocode was not successful for the following reason: " + status);
+  }
+});
+alert('Latitude: ' + lat + ' Logitude: ' + lng);*/
+
+
+
+
+
+    this.activeEvents = ko.observable([]); //List of events
+    this.activeStatus = ko.observable('Searching for events near you');
+    this.mapMarkers = ko.observable([]); //All Map Marker
+    this.filterlist = ko.observable([]); //Filtered list
+    this.local = ko.observable(26.09951,-80.38377);
+    this.numberOfEvents = ko.computed(function() {
+   //return self.filterlist().length;
+  });
+
+
+//Error handling if Google Maps fails to load
+ this.mapRequestTimeout = setTimeout(function() {
+   $('#map-canvas').html('Google Maps failed to load Please refresh your browser.');
+ }, 8000);
 // Use API to get events data
-  function getEvents(location) {
-    var zips = location;
+
+    //city = "26.09951,-80.38377";
+    document.getElementById('submit').addEventListener('click', function() {
+      city = $('#address').value;
+      search = $('#query').value;
+      alert(city);
+    });
+  function getEvents(city, search) {
+
 
 // Use this function to format the date for the url
     Date.prototype.defaultView=function(){
@@ -118,28 +195,35 @@
       return String(yyyy+"-"+mm+"-"+dd)
     }
   // Get current date from user and format for url string
-    var today = new Date();
-    var dated =today.defaultView();
+    //var today = new Date();
+    //var dated =today.defaultView();
 
-    var activeURL = "http://api.amp.active.com/v2/search?query=Running&cb=displayResults&start_date="+dated+"..&zip="+zips+"&radius=50&api_key=uq2yyhkfewq9j2te9j754g6g";
+    //var activeURL = "http://api.amp.active.com/v2/search/?lat_lon="+city+"&radius=50&per_page=10&sort=distance&topic=running&start_date="+dated+"..&exclude_children=true&cb=displayResults&api_key=uq2yyhkfewq9j2te9j754g6g";
+    var activeURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20local.search%20where%20zip%3D'"+city+"'%20and%20query%3D'"+search+"'&format=json&diagnostics=true";
+    alert(activeURL);
+
 
     $.ajax({
+      type: "GET",
       url: activeURL,
-      jsonp: 'displayResults',
-      dataType: 'jsonp',
-      success: function() {
-        alert('sucess');
-        console.log(data);
-      },
-      error: function() {
-        alert('Somethin went wrong please reload the page');
+      dataType: "jsonp",
+      //jsonp: "callBack",
+      success: function(data) {
+        var eventList = data[1];
+
       }
     });
+
+
+
+
+
   }
 
 
-  getEvents(33327);
 
-  //initMap();
+
+  initMap();
+  getEvents("33327","parks");
 }
   ko.applyBindings(new ViewModel());
