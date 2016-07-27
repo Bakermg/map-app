@@ -68,13 +68,20 @@ function ViewModel() {
         "featureType": "road"
     }];
 
+    //Error handling if Google Maps fails to load
+     this.mapRequestTimeout = setTimeout(function() {
+       $('#map-canvas').html('Google Maps failed to load Please refresh your browser.');
+     }, 8000);
+
+
       //create new map with inintail location
       city = {lat: 26.09951, lng: -80.38377};
 
        map = new google.maps.Map(document.getElementById('map'), {
           zoom: 13,
           styles: styles,
-          center: city
+          center: city,
+          mapTypeControl: false
         });
         var geocoder = new google.maps.Geocoder();
 
@@ -82,6 +89,12 @@ function ViewModel() {
           geocodeAddress(geocoder, map);
           city = $('#address').value;
           search = $('#query').value;
+        });
+
+        google.maps.event.addDomListener(window, "resize" , function() {
+          var center = map.getCenter();
+          google.maps.event.trigger(map, "resize");
+          map.setCenter(center);
         });
 
 
@@ -113,48 +126,26 @@ function ViewModel() {
       }
 
 
-    /* city = {lat: 26.09951,lng: -80.38377};
-     map = new google.maps.Map(document.getElementById('map'), {
-        center: city,
-        zoom: 11,
-        styles: styles,
-        mapTypeControl: false
-    });
 
       clearTimeout(self.mapRequestTimeout);
-
-  // found stackoverflow trick to re-center map and make responsive
-
-    google.maps.event.addDomListener(window, "resize" , function() {
-      var center = map.getCenter();
-      google.maps.event.trigger(map, "resize");
-      map.setCenter(center);
-    });
 
      infowindow = new google.maps.InfoWindow({maxWidth: 300});
 
 
-
-        document.getElementById('submit').addEventListener('click', function() {
-          geocodeAddress(geocoder, map);
-        });
-
-
-}
-  var geocoder = new google.maps.Geocoder();
-  var lat = '';
-  var lng = '';
-  var address = document.getElementById('location').value;
-  geocoder.geocode( { 'address': address}, function(results, status) {
-  if (status == google.maps.GeocoderStatus.OK) {
-     lat = results[0].geometry.location.lat();
-     lng = results[0].geometry.location.lng();
-    }
-   else {
-    alert("Geocode was not successful for the following reason: " + status);
-  }
-});
-alert('Latitude: ' + lat + ' Logitude: ' + lng);*/
+      //var geocoder = new google.maps.Geocoder();
+      //var lat = '';
+      //var lng = '';
+      //var address = document.getElementById('location').value;
+      //geocoder.geocode( { 'address': address}, function(results, status) {
+      //if (status == google.maps.GeocoderStatus.OK) {
+        // lat = results[0].geometry.location.lat();
+        // lng = results[0].geometry.location.lng();
+        //}
+       //else {
+        //alert("Geocode was not successful for the following reason: " + status);
+      //}
+    //});
+        //alert('Latitude: ' + lat + ' Logitude: ' + lng);*/
 
 
 
@@ -170,13 +161,8 @@ alert('Latitude: ' + lat + ' Logitude: ' + lng);*/
   });
 
 
-//Error handling if Google Maps fails to load
- this.mapRequestTimeout = setTimeout(function() {
-   $('#map-canvas').html('Google Maps failed to load Please refresh your browser.');
- }, 8000);
-// Use API to get events data
 
-    //city = "26.09951,-80.38377";
+// Use API to get search local data
     document.getElementById('submit').addEventListener('click', function() {
       city = $('#address').value;
       search = $('#query').value;
@@ -194,18 +180,18 @@ alert('Latitude: ' + lat + ' Logitude: ' + lng);*/
       var yyyy=this.getFullYear();
       return String(yyyy+"-"+mm+"-"+dd)
     }
-  // Get current date from user and format for url string
-    //var today = new Date();
-    //var dated =today.defaultView();
+   //Get current date from user and format for url string
+    var today = new Date();
+    var dated =today.defaultView();
 
-    //var activeURL = "http://api.amp.active.com/v2/search/?lat_lon="+city+"&radius=50&per_page=10&sort=distance&topic=running&start_date="+dated+"..&exclude_children=true&cb=displayResults&api_key=uq2yyhkfewq9j2te9j754g6g";
-    var activeURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20local.search%20where%20zip%3D'"+city+"'%20and%20query%3D'"+search+"'&format=json&diagnostics=true";
-    alert(activeURL);
+
+    var localURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20local.search%20where%20zip%3D'"+city+"'%20and%20query%3D'"+search+"'&format=json&diagnostics=true";
+    alert(localURL);
 
 
     $.ajax({
       type: "GET",
-      url: activeURL,
+      url: localURL,
       dataType: "jsonp",
       //jsonp: "callBack",
       success: function(data) {
@@ -218,7 +204,7 @@ alert('Latitude: ' + lat + ' Logitude: ' + lng);*/
 
 
 
-  }
+
 
 
 
