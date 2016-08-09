@@ -1,14 +1,33 @@
 function ViewModel() {
 
     var self = this;
-    var map, infowindow, myLatLng, title, pos;
+    var map, infowindow, title, pos;
+    var myLatLng;
     var area;
     var city;
     var search;
 
+
+    this.activeEvents = ko.observable([]); //List of events
+    this.activeStatus = ko.observable('Searching near you');
+    this.mapMarkers = ko.observable([]); //All Map Marker
+    this.filterlist = ko.observable([]); //Filtered list
+    this.local = ko.observable(26.09951, -80.38377);
+    this.numberOfEvents = ko.computed(function() {
+        //return self.filterlist().length;
+    });
+
+
+    var topicLocation = [];
+    var markers = [];
+    //Error handling if Google Maps fails to load
+        this.mapRequestTimeout = setTimeout(function() {
+            $('#map').html('Google Maps failed to load Please refresh your browser.');
+        }, 8000);
+
+
     // Initialize Google map
     function initMap() {
-
         // Some custom styling for the map
         var styles = [{
             "featureType": "administrative",
@@ -88,41 +107,36 @@ function ViewModel() {
             }]
         }];
 
-        //Error handling if Google Maps fails to load
-        this.mapRequestTimeout = setTimeout(function() {
-            $('#map-canvas').html('Google Maps failed to load Please refresh your browser.');
-        }, 8000);
-
-
         //create new map with inintail location
-        city =  {lat: 26.09951, lng: -80.38377} ;
-        //var city = showLocation();
+
+        //city = new google.maps.LatLng(26.09951, -80.38377);
         map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 13,
+            zoom: 11,
             styles: styles,
-            center: city,//{lat: 26.09951, lng: -80.38377},
+            center: {lat: 38.906830, lng: -77.038599},
             mapTypeControl: false
         });
 
-        var marker = new google.maps.Marker({
-          position: myLatLng,
-          map: map,
-          animation: google.maps.Animation.DROP
-        });
-        //var InfoWindow = new google.maps.InfoWindow({map: map});
+        var infoWindow = new google.maps.InfoWindow({map: map});
 
-       /*function showLocation() {
+        if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(function(position) {
-             city = {
+            var city = {
               lat: position.coords.latitude,
               lng: position.coords.longitude
             };
-            alert(city);
+
+            infoWindow.setPosition(city);
+            infoWindow.setContent('Location found.');
             map.setCenter(city);
+          }, function() {
+            handleLocationError(true, infoWindow, map.getCenter());
           });
-          console.log(city);
+        } else {
+          // Browser doesn't support Geolocation
+          handleLocationError(false, infoWindow, map.getCenter());
         }
-*/
+
         google.maps.event.addDomListener(window, "resize", function() {
             var center = map.getCenter();
             google.maps.event.trigger(map, "resize");
@@ -130,28 +144,45 @@ function ViewModel() {
         });
 
 
-    clearTimeout(self.mapRequestTimeout);
-}
+        clearTimeout(self.mapRequestTimeout);
 
+      }
 
-    this.activeEvents = ko.observable([]); //List of events
-    this.activeStatus = ko.observable('Searching for events near you');
-    this.mapMarkers = ko.observable([]); //All Map Marker
-    this.filterlist = ko.observable([]); //Filtered list
-    this.local = ko.observable(26.09951, -80.38377);
-    this.numberOfEvents = ko.computed(function() {
-        //return self.filterlist().length;
-    });
+      function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+        infoWindow.setPosition(pos);
+        infoWindow.setContent(browserHasGeolocation ?
+                              'Error: The Geolocation service failed.' :
+                              'Error: Your browser doesn\'t support geolocation.');
+      }
+
+      function drop() {
+          //clearMarkers();
+          for (var i = 0; i < topicLocation.length; i++) {
+            addMarkerWithTimeout(topicLocation[i], i * 200);
+          }
+        }
+
+        function addMarkerWithTimeout(position, timeout) {
+          window.setTimeout(function() {
+            markers.push(new google.maps.Marker( {
+              position: position,
+              map: map,
+              animation: google.maps.Animation.DROP
+            }));
+          }, timeout);
+        }
+
 
 
 
     // Use API to get search local data
     document.getElementById('submit').addEventListener('click', function() {
-        city = $('#address').value;
-        search = $('#query').value;
-        alert(city, search);
+        //city = $('#address').value;
+        //search = $('#query').value;
+        //alert(city, search);
     });
 
+    //var myLatLng;
 
     function getEvents(city, search) {
         var localURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20local.search%20where%20zip%3D'" + city + "'%20and%20query%3D'" + search + "'&format=json&diagnostics=true";
@@ -164,28 +195,23 @@ function ViewModel() {
             dataType: "jsonp",
             //jsonp: "callBack",
             success: function(data) {
-                var dataList = data.query.results.Result[0].ClickUrl;
+                var dataList = data.query.results.Result[0].Title;
                 var mylat = data.query.results.Result[0].Latitude;
                 var myLon = data.query.results.Result[0].Longitude;
-                var markerPostion = {lat: mylat, lng: myLon};
-                myLatLng = markerPostion;
-                alert(markerPostion);
-                alert(dataList);
+                var markerPostion = {lat: parseFloat(mylat), lng: parseFloat(myLon)};
 
+                //myLatLng = markerPostion;
+                //console.log(markerPostion);
+                //alert(dataList);
+                topicLocation.push(markerPostion);
             }
+
         });
+
     }
 
-
-
-
-
-
-
-
-
-
     initMap();
+    drop();
     getEvents("33327", "running");
 }
 
