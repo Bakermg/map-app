@@ -6,16 +6,17 @@ function ViewModel() {
     var area;
     var city;
     var search;
+    var topicTitles = [];
 
 
-    this.activeEvents = ko.observable([]); //List of events
-    this.activeStatus = ko.observable('Searching near you');
-    this.mapMarkers = ko.observable([]); //All Map Marker
-    this.filterlist = ko.observable([]); //Filtered list
-    this.local = ko.observable(26.09951, -80.38377);
-    this.numberOfEvents = ko.computed(function() {
+    //this.topicTitles = ko.observable([]); //List of events
+    //this.activeStatus = ko.observable('Searching near you');
+    //this.mapMarkers = ko.observable([]); //All Map Marker
+    //this.filterlist = ko.observable([]); //Filtered list
+    //this.local = ko.observable(26.09951, -80.38377);
+    //this.numberOfEvents = ko.computed(function() {
         //return self.filterlist().length;
-    });
+    //});
 
 
     var topicLocation = [];
@@ -113,21 +114,24 @@ function ViewModel() {
         map = new google.maps.Map(document.getElementById('map'), {
             zoom: 11,
             styles: styles,
-            center: {lat: 38.906830, lng: -77.038599},
+            center: {lat: 26.09951, lng: -80.38377},
             mapTypeControl: false
         });
+        clearTimeout(self.mapRequestTimeout);
 
-        var infoWindow = new google.maps.InfoWindow({map: map});
 
-        if (navigator.geolocation) {
+        //var infoWindow = new google.maps.InfoWindow({map: map});
+
+        //Geolocation to find users local to center map
+        /*if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(function(position) {
             var city = {
               lat: position.coords.latitude,
               lng: position.coords.longitude
             };
 
-            infoWindow.setPosition(city);
-            infoWindow.setContent('Location found.');
+            //infoWindow.setPosition(city);
+            //infoWindow.setContent('You are here.');
             map.setCenter(city);
           }, function() {
             handleLocationError(true, infoWindow, map.getCenter());
@@ -143,76 +147,99 @@ function ViewModel() {
             map.setCenter(center);
         });
 
-
-        clearTimeout(self.mapRequestTimeout);
+          clearTimeout(self.mapRequestTimeout);
 
       }
 
       function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-        infoWindow.setPosition(pos);
+        infoWindow.setPosition(city);
         infoWindow.setContent(browserHasGeolocation ?
                               'Error: The Geolocation service failed.' :
                               'Error: Your browser doesn\'t support geolocation.');
-      }
+      }*/
 
-      function drop() {
-          //clearMarkers();
-          for (var i = 0; i < topicLocation.length; i++) {
-            addMarkerWithTimeout(topicLocation[i], i * 200);
-          }
-        }
 
-        function addMarkerWithTimeout(position, timeout) {
-          window.setTimeout(function() {
-            markers.push(new google.maps.Marker( {
-              position: position,
+      var defaultIcon = makeMarkerIcon('0091ff');
+
+      var highlightedIcon = makeMarkerIcon('ffff24');
+
+      for (var i = 0; i < topicLocation.length; i++) {
+          var position = topiclocations[i].location;
+          //var title = topiclocations[i].title;
+
+          var marker = new google.maps.Marker({
               map: map,
-              animation: google.maps.Animation.DROP
-            }));
-          }, timeout);
-        }
+              position: position,
+              //title: title,
+              icon: defaultIcon,
+              animation: google.maps.Animation.DROP,
+              id: i
+          });
 
+          markers.push(marker);
 
+          marker.addListener('click', function() {
+              populateInfoWindow(this, largeInfowindow);
+          });
+
+          marker.addListener('mouseover', function() {
+              this.setIcon(highlightedIcon);
+          });
+          marker.addListener('mouseout', function() {
+              this.setIcon(defaultIcon)
+          });
+
+}
+}
 
 
     // Use API to get search local data
-    document.getElementById('submit').addEventListener('click', function() {
-        //city = $('#address').value;
+    //document.getElementById('submit').addEventListener('click', function() {
+       // city = $('#address').value;
         //search = $('#query').value;
         //alert(city, search);
-    });
-
-    //var myLatLng;
+    //});
 
     function getEvents(city, search) {
         var localURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20local.search%20where%20zip%3D'" + city + "'%20and%20query%3D'" + search + "'&format=json&diagnostics=true";
-        alert(localURL);
-
 
         $.ajax({
             type: "GET",
             url: localURL,
             dataType: "jsonp",
             //jsonp: "callBack",
-            success: function(data) {
-                var dataList = data.query.results.Result[0].Title;
-                var mylat = data.query.results.Result[0].Latitude;
-                var myLon = data.query.results.Result[0].Longitude;
+          })
+            .done (function(data) {
+              var len = data.query.results.Result.length;
+              for (var i = 0; i < len; i++) {
+                var dataList = data.query.results.Result[i].Title;
+                var mylat = data.query.results.Result[i].Latitude;
+                var myLon = data.query.results.Result[i].Longitude;
                 var markerPostion = {lat: parseFloat(mylat), lng: parseFloat(myLon)};
 
-                //myLatLng = markerPostion;
-                //console.log(markerPostion);
-                //alert(dataList);
+                myLatLng = markerPostion;
                 topicLocation.push(markerPostion);
-            }
-
-        });
+                topicTitles.push(dataList);
+              }
+            });
 
     }
 
+    function makeMarkerIcon(markerColor) {
+      var markerImage = new google.maps.MarkerImage(
+          'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|' + markerColor + '|40|_|%E2%80%A2',
+          new google.maps.Size(21, 34),
+          new google.maps.Point(0, 0),
+          new google.maps.Point(10, 34),
+          new google.maps.Size(21, 34));
+      return markerImage;
+  }
+
+    console.log(topicTitles);
+    console.log(topicLocation);
     initMap();
-    drop();
     getEvents("33327", "running");
+
 }
 
 
