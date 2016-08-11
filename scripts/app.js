@@ -6,20 +6,13 @@ function ViewModel() {
     var area;
     var city;
     var search;
-    var topicTitles = [];
 
+    this.topicTitles = ko.observable([]);
+    this.mapMarkers = ko.observable([]); //All Map Marker
+    this.topicLocation = ko.observable([]);
 
-    //this.topicTitles = ko.observable([]); //List of events
-    //this.activeStatus = ko.observable('Searching near you');
-    //this.mapMarkers = ko.observable([]); //All Map Marker
-    //this.filterlist = ko.observable([]); //Filtered list
-    //this.local = ko.observable(26.09951, -80.38377);
-    //this.numberOfEvents = ko.computed(function() {
-        //return self.filterlist().length;
-    //});
-
-
-    var topicLocation = [];
+    console.log(self.topicLocation);
+    console.log(self.topicTitles);
     var markers = [];
     //Error handling if Google Maps fails to load
         this.mapRequestTimeout = setTimeout(function() {
@@ -117,7 +110,7 @@ function ViewModel() {
             center: {lat: 26.09951, lng: -80.38377},
             mapTypeControl: false
         });
-        clearTimeout(self.mapRequestTimeout);
+
 
 
         //var infoWindow = new google.maps.InfoWindow({map: map});
@@ -163,8 +156,8 @@ function ViewModel() {
 
       var highlightedIcon = makeMarkerIcon('ffff24');
 
-      for (var i = 0; i < topicLocation.length; i++) {
-          var position = topiclocations[i].location;
+      for (var i = 0; i < self.topicLocation.length; i++) {
+          var position = self.topiclocations[i].location;
           //var title = topiclocations[i].title;
 
           var marker = new google.maps.Marker({
@@ -189,7 +182,8 @@ function ViewModel() {
               this.setIcon(defaultIcon)
           });
 
-}
+  }
+  clearTimeout(self.mapRequestTimeout);
 }
 
 
@@ -218,8 +212,13 @@ function ViewModel() {
                 var markerPostion = {lat: parseFloat(mylat), lng: parseFloat(myLon)};
 
                 myLatLng = markerPostion;
-                topicLocation.push(markerPostion);
-                topicTitles.push(dataList);
+                self.topicLocation.push({
+                  lat: mylat,
+                  lng: myLon
+                });
+                self.topicTitles.push({
+                  queryLocation: datalist
+                });
               }
             });
 
@@ -235,8 +234,8 @@ function ViewModel() {
       return markerImage;
   }
 
-    console.log(topicTitles);
-    console.log(topicLocation);
+    console.log(this.topicTitles);
+    //console.log(topicLocation);
     initMap();
     getEvents("33327", "running");
 
