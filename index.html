@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Find anything in Your City</title>
+    <title>Around Me</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/mystyles.css">
@@ -11,23 +11,28 @@
 
 <body>
     <div id="map"></div>
-
     <div class="search container-fluid">
-        <form>
-            <input id="address" type="text" placeholder="Enter Your Zipcode" >
-            <input id="query" type="text" placeholder="Search Topic">
-            <button id="drop" onclick="drop()" value="Search">Search</button>
-        </form>
-    </div>
-    <div class="results-list">
-      <div>
-        <h2 class="status-message" data-bind="text: activeStatus"></h2>
-        <ul class="results" data-bind="foreach: topicTitles"></ul>
-      </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <h1>Around Me Search App</h1>
+                <form>
+                    <input id="query" type="text" placeholder="Search">
+                    <button id="drop" onclick="" value="Search">Filter</button>
+                </form>
+                <div class="results-list">
+                    <div>
+                        <h2 class="status-message"></h2>
+                        <ul class="results" data-bind="foreach: locationList"></ul>
+                            <li data-bind="text: name, click: $parent.setLocation"></li>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyCPAgVGmjpc4LC6NkdDw9HO_MzX0_8l_2M"></script>
     <script type="text/javascript" src="scripts/knockout-3.2.0.js"></script>
     <script type="text/javascript" src="scripts/app.js"></script>
 </body>
+
 </html>
