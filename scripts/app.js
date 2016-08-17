@@ -4,11 +4,7 @@
     var area;
     var city;
     var search;
-
-    //this.topicTitles = ko.observable([]);
-    //this.mapMarkers = ko.observable([]); //All Map Marker
-    //this.topicLocation = ko.observable([]);
-
+    var markers = [];
 
     //Error handling if Google Maps fails to load
         this.mapRequestTimeout = setTimeout(function() {
@@ -97,13 +93,11 @@
             }]
         }];
 
-        //create new map with inintail location
-
-        //city = new google.maps.LatLng(26.09951, -80.38377);
+        //create new map with initial location
         map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 11,
+            zoom: 10,
             styles: styles,
-            center: {lat: 26.09951, lng: -80.38377},
+            center: {lat: 26.1033643, lng: -80.2706109},
             mapTypeControl: false
         });
 
@@ -114,45 +108,15 @@
         });
 
 
-        var infoWindow = new google.maps.InfoWindow({map: map});
-
-        //Geolocation to find users local to center map
-        /*if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(function(position) {
-            var city = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            };
-
-            //infoWindow.setPosition(city);
-            //infoWindow.setContent('You are here.');
-            map.setCenter(city);
-          }, function() {
-            handleLocationError(true, infoWindow, map.getCenter());
-          });
-        } else {
-          // Browser doesn't support Geolocation
-          handleLocationError(false, infoWindow, map.getCenter());
-        }
+        var infoWindow = new google.maps.InfoWindow({map: name});
 
 
-
-          clearTimeout(self.mapRequestTimeout);
-
-      }
-
-      function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-        infoWindow.setPosition(city);
-        infoWindow.setContent(browserHasGeolocation ?
-                              'Error: The Geolocation service failed.' :
-                              'Error: Your browser doesn\'t support geolocation.');
-      }*/
 
 
       var defaultIcon = makeMarkerIcon('0091ff');
 
       var highlightedIcon = makeMarkerIcon('ffff24');
-
+      var self = this;
       for (var i = 0; i < initialLocations.length; i++) {
           var position = initialLocations[i].location;
           //var title = topiclocations[i].title;
@@ -165,7 +129,7 @@
               id: i
           });
 
-          this.markers.push(marker);
+          markers.push(marker);
 
           marker.addListener('click', function() {
               populateInfoWindow(this, largeInfowindow);
@@ -183,14 +147,9 @@
 }
 
 
-    // Use API to get search local data
-    //document.getElementById('submit').addEventListener('click', function() {
-       // city = $('#address').value;
-        //search = $('#query').value;
-        //alert(city, search);
-    //});
+  //Get local info for the place clicked from yahoo local api
 
-    /*function getEvents(city, search) {
+    function getEvents(city, search) {
         var localURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20local.search%20where%20zip%3D'" + city + "'%20and%20query%3D'" + search + "'&format=json&diagnostics=true";
 
         $.ajax({
@@ -206,19 +165,10 @@
                 var mylat = data.query.results.Result[i].Latitude;
                 var myLon = data.query.results.Result[i].Longitude;
                 var markerPostion = {lat: parseFloat(mylat), lng: parseFloat(myLon)};
-
-                myLatLng = markerPostion;
-                self.topicLocation.push({
-                  lat: mylat,
-                  lng: myLon
-                });
-                self.topicTitles.push({
-                  queryLocation: datalist
-                });
               }
             });
 
-    }*/
+    }
 
     function makeMarkerIcon(markerColor) {
       var markerImage = new google.maps.MarkerImage(
@@ -338,6 +288,7 @@ var Location = function(data) {
 
 var ViewModel = function() {
   var self = this;
+
   this.markers = ko.observable([]);
   this.locationList = ko.observableArray([]);
 
@@ -346,6 +297,7 @@ var ViewModel = function() {
   });
 
   this.currentLocation = ko.observable(this.locationList()[0]);
+  console.dir(this.currentLocation);
 
   this.setLocation = function(clickedLocation) {
     self.currentLocation(clickedLocation);

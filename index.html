@@ -2,31 +2,34 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Around Me</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/mystyles.css">
+    <script src="https://use.fontawesome.com/096fb285b7.js"></script>
 </head>
 
 <body>
     <div id="map"></div>
-    <div class="search container-fluid">
-        <div class="row">
-            <div class="col-sm-2">
-                <h1>Around Me Search App</h1>
-                <form>
-                    <input id="query" type="text" placeholder="Search">
-                    <button id="drop" onclick="" value="Search">Filter</button>
-                </form>
-                <div class="results-list">
-                    <div>
-                        <h2 class="status-message"></h2>
-                        <ul class="results" data-bind="foreach: locationList"></ul>
-                            <li data-bind="text: name, click: $parent.setLocation"></li>
-                    </div>
-                </div>
-            </div>
+    <div class="searchbar">
+        <form action="">
+            <input type="text" placeholder="Filter by Name">
+            <input type="text" value="Go" id="submit">
+        </form>
+    </div>
+    <div class="locbtn-large">
+        <i class="fa fa-compass fa-2x"></i>
+    </div>
+    <div class="results">
+        <div>
+            <ul class="results-list" data-bind="foreach: locationList">
+                <li data-bind="click: $parent.setLoction">
+                    <p data-bind="text: name"></p>
+                </li>
+            </ul>
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
