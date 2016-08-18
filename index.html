@@ -21,13 +21,13 @@
         </form>
     </div>
     <div class="locbtn-large" title="Center map" data-bind="click: centerMap()">
-        <i class="fa fa-compass fa-2x"></i>
+        <i class="fa fa-bullseye fa-2x"></i>
     </div>
     <div class="results">
         <div>
             <ul class="results-list" data-bind="foreach: locationList">
-                <li data-bind="click: $parent.setLoction">
-                    <p data-bind="text: name"></p>
+                <li data-bind="visable: marker.visable, click: $parent.setLoction">
+                    <p data-bind="text: marker.title"></p>
                 </li>
             </ul>
         </div>
