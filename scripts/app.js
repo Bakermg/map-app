@@ -95,9 +95,9 @@
 
         //create new map with initial location
         map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 10,
+            zoom: 11,
             styles: styles,
-            center: {lat: 26.1033643, lng: -80.2706109},
+            center: {lat: 26.08207118, lng: -80.05943298},
             mapTypeControl: false
         });
 
@@ -108,7 +108,7 @@
         });
 
 
-        var infoWindow = new google.maps.InfoWindow({map: name});
+         var largeInfowindow = new google.maps.InfoWindow();
 
 
 
@@ -146,10 +146,47 @@
   clearTimeout(self.mapRequestTimeout);
 }
 
+function populateInfoWindow(marker, infowindow) {
+    if (infowindow.marker != marker) {
+        infowindow.setContent('');
+        infowindow.marker = marker;
+        infowindow.addListener('closeclick', function() {
+            infowindow.marker = null;
+        })
+
+
+        var streetViewService = new google.maps.StreetViewService();
+        var radius = 50;
+
+        function getStreetView(data, status) {
+            if (status == google.maps.StreetViewStatus.OK) {
+                var nearStreetViewLocation = data.location.latLng;
+                var heading = google.maps.geometry.spherical.computeHeading(nearStreetViewLocation, marker.position);
+                infowindow.setContent('<div>' + marker.name + '</div><div id="pano"></div>');
+                var panoramaOptions = {
+                    postion: nearStreetViewLocation,
+                    pov: {
+                        heading: heading,
+                        pitch: 30
+                    }
+                };
+                var panorama = new google.maps.StreetViewPanorama(
+                    document.getElementById('pano'), panoramaOptions);
+            } else {
+                infowindow.setContent('<div>' + marker.name + '</div>' +
+                    '<div>No Street View Found</div>');
+            }
+        }
+
+        streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+        infowindow.open(map, marker);
+    }
+}
+
 
   //Get local info for the place clicked from yahoo local api
 
-    function getEvents(city, search) {
+    function getLocalList(city, search) {
         var localURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20local.search%20where%20zip%3D'" + city + "'%20and%20query%3D'" + search + "'&format=json&diagnostics=true";
 
         $.ajax({
@@ -181,9 +218,6 @@
   }
 
 
-    //console.log(topicLocation);
-
-    //getEvents("33327", "running");
 
 var initialLocations = [
         {
@@ -289,6 +323,12 @@ var Location = function(data) {
 var ViewModel = function() {
   var self = this;
 
+  this.centerMap = function() {
+    var centerCity = new google.maps.LatLng(26.08207118, -80.05943298);
+    map.panTo(centerCity);
+    map.setZoom(11);
+  };
+
   this.markers = ko.observable([]);
   this.locationList = ko.observableArray([]);
 
@@ -297,16 +337,16 @@ var ViewModel = function() {
   });
 
   this.currentLocation = ko.observable(this.locationList()[0]);
-  console.dir(this.currentLocation);
+
 
   this.setLocation = function(clickedLocation) {
     self.currentLocation(clickedLocation);
   };
 
 
-
+initMap();
 }
 
-initMap();
+
 
 ko.applyBindings(new ViewModel());
