@@ -1,6 +1,6 @@
 Map Todo list:
-  ☐ Get map to render with user lat long
-  ☐ Build search bar and area for list items
+  ✔ Get map to render with user lat long @done (16-08-18 21:39)
+  ✔ Build search bar and area for list items @done (16-08-18 21:39)
   ☐ Use Yahoo api to find info in the user locaion
   ☐ Drop pins in the top 10 locations and aninmate when selected
   Some extra features to add:

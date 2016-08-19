@@ -113,7 +113,8 @@ function makeMarkerIcon(markerColor) {
 
 
 
-var initialLocations = [{
+
+  var initialLocations = [{
         name: "Fort Lauderdale Beach Park",
         latLng: {
             lat: 26.1120152,
@@ -123,7 +124,8 @@ var initialLocations = [{
         city: "Fort Lauderdale",
         zipcode: 33316,
         cat: "park",
-        visable: true
+        visable: true,
+        icon: defaultIcon
     }, {
         name: "Markham Park Moutain Bike Trails",
         latLng: {
@@ -134,7 +136,8 @@ var initialLocations = [{
         city: "Sunrise",
         zipcode: 33326,
         cat: "park",
-        visable: true
+        visable: true,
+        icon: defaultIcon
     }, {
         name: "Vista View Park",
         latLng: {
@@ -145,7 +148,8 @@ var initialLocations = [{
         city: "Davie",
         zipcode: 33330,
         cat: "park",
-        visable: true
+        visable: true,
+        icon: defaultIcon
     }, {
         name: "Graciano's",
         latLng: {
@@ -156,7 +160,8 @@ var initialLocations = [{
         city: "Weston",
         zipcode: 33326,
         cat: "food",
-        visable: true
+        visable: true,
+        icon: defaultIcon
     }, {
         name: "Vienna Cafe",
         latLng: {
@@ -167,7 +172,8 @@ var initialLocations = [{
         city: "Davie",
         zipcode: 33324,
         cat: "food",
-        visable: true
+        visable: true,
+        icon: defaultIcon
     }, {
         name: "Sawgrass Mills Mall",
         latLng: {
@@ -178,7 +184,8 @@ var initialLocations = [{
         city: "Sunrise",
         zipcode: 33323,
         cat: "shopping",
-        visable: true
+        visable: true,
+        icon: defaultIcon
     }, {
         name: "Fort Lauderdale Hollywood Airport",
         latLng: {
@@ -189,7 +196,8 @@ var initialLocations = [{
         city: "Fort Lauderdale",
         zipcode: 33315,
         cat: "airport",
-        visable: true
+        visable: true,
+        icon: defaultIcon
     }, {
         name: "The Shops At Pembroke Gardens",
         latLng: {
@@ -200,9 +208,9 @@ var initialLocations = [{
         city: "Pembroke Pines",
         zipcode: 33027,
         cat: "shopping",
-        visable: true
+        visable: true,
+        icon: defaultIcon
     }
-
 ];
 
 var defaultIcon = makeMarkerIcon('0091ff');
@@ -212,14 +220,28 @@ var Location = function(data) {
     //Create markers from the data
     this.marker = new google.maps.Marker({
         title: data.name,
-        postion: data.latLng,
+        position: data.latLng,
         address: data.streetAddress,
         icon: defaultIcon,
         Animation: google.maps.Animation.DROP,
         visable: true,
     });
     //Create an infowindow for each location
-    this.infoWindow = new google.maps.InfoWindow({ maxWidth: 300 });
+    this.infoWindow = new google.maps.InfoWindow({ maxWidth: 400 });
+};
+
+Location.prototype.toggle = function() {
+    if(this.marker.getAnimation() === null) {
+      this.marker.setAnimation(google.maps.Animation.BOUNCE);
+    } else {
+      this.marker.setAnimation(null);
+    }
+    this.infoWindow.open();
+};
+
+Location.prototype.stopToggle = function() {
+  this.marker.setAnimation(null);
+  this.infoWindow.close();
 };
 
 
@@ -227,21 +249,22 @@ var ViewModel = function() {
 
     var self = this;
     var map;
-    self.locationList = ko.observableArray([]);
+    var clickedItem = null;
+    this.locationList = ko.observableArray([]);
+    this.search = ko.observable('');
+    this.yahooQuery = ko.observableArray([]);
 
+    //Set timeout to handle google maps error
     this.mapRequestTimeout = setTimeout(function() {
         $('#map').html('Google Maps failed to load Please refresh your browser.');
     }, 8000);
 
-    this.centerMap = function() {
-        var centerCity = new google.maps.LatLng(26.1033643, -80.2706109);
-        map.panTo(centerCity);
-        map.setZoom(11);
-    };
+
 
 
     initialLocations.forEach(function(locationItem) {
         self.locationList.push(new Location(locationItem));
+
     });
 
     map = new google.maps.Map(document.getElementById('map'), {
@@ -251,7 +274,15 @@ var ViewModel = function() {
         mapTypeControl: false
     });
 
+    //clear timeout once map has rendered
     clearTimeout(self.mapRequestTimeout);
+
+    //Map center button function to get back to center
+    this.centerMap = function() {
+        var centerCity = new google.maps.LatLng(26.1033643, -80.2706109);
+        map.panTo(centerCity);
+        map.setZoom(11);
+    };
 
     google.maps.event.addDomListener(window, "resize", function() {
         center = map.getCenter();
@@ -259,32 +290,48 @@ var ViewModel = function() {
         map.setCenter(center);
     });
 
-    self.locationList().forEach(function(locItem) {
+    this.locationList().forEach(function(locItem) {
 
         locItem.marker.setMap(map);
 
-        locItem.marker.addListener('mouseover', function() {
-            this.setIcon(highlightedIcon);
-        });
-
-        locItem.marker.addListener('mouseout', function() {
-            this.setIcon(defaultIcon)
-        });
-
         locItem.marker.addListener('click', function() {
+          if(clickedItem !== null) {
+            clickedItem.stopToggle();
+            clickedItem.infoWindow.close();
+          }
+            locItem.toggle();
             locItem.infoWindow.open(map, locItem.marker);
+
+            clickedItem = locItem;
             map.panTo(locItem.marker.position);
             locItem.marker.setMap(map);
         });
 
         var contentString = '<h3>' + locItem.marker.name + '</h3>' + locItem.marker.streetAddress + '<br>' + '<h3>' + locItem.marker.cat + '</h3>';
         locItem.infoWindow.setContent(contentString);
-    });
+console.log(contentString);
+        locItem.infoWindow.addListener('closeclick' , function() {
+          locItem.stopToggle();
+        });
+  });
 
+    self.bounce = function (locItem) {
+    if (clickedItem !== null) {
+      clickedItem.stopToggle();
+      locItem.infoWindow.close();
+    }
+    locItem.toggle();
+    locItem.infoWindow.open(map, locItem.marker);
+    clickedItem = locItem;
 
-};
+    /** pan to the clicked marker */
+    map.panTo(locItem.marker.position);
+    locItem.marker.setMap(map);
+    };
 
-getLocalList(33330, "Vista View Park");
+}
+
+//getLocalList(33330, "Vista View Park");
 
 
 ko.applyBindings(new ViewModel());

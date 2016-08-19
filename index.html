@@ -26,14 +26,14 @@
     <div class="results">
         <div>
             <ul class="results-list" data-bind="foreach: locationList">
-                <li data-bind="visable: marker.visable, click: $parent.setLoction">
+                <li data-bind="visable: marker.visable, click: $parent.bounce">
                     <p data-bind="text: marker.title"></p>
                 </li>
             </ul>
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyCPAgVGmjpc4LC6NkdDw9HO_MzX0_8l_2M"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3&libraries=places&key=AIzaSyCPAgVGmjpc4LC6NkdDw9HO_MzX0_8l_2M"></script>
     <script type="text/javascript" src="scripts/knockout-3.2.0.js"></script>
     <script type="text/javascript" src="scripts/app.js"></script>
 </body>
