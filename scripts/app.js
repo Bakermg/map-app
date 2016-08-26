@@ -78,29 +78,7 @@ var styles = [{
 }];
 
 
-//Get local info for the place clicked from yahoo local api
-
-function getLocalList(city, search) {
-    var localURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20local.search%20where%20zip%3D'" + city + "'%20and%20query%3D'" + search + "'&format=json&diagnostics=true";
-
-    $.ajax({
-            type: "GET",
-            url: localURL,
-            dataType: "jsonp",
-            //jsonp: "callBack",
-        })
-        .done(function(data) {
-            var len = data.query.results.Result.length;
-            for (var i = 0; i < len; i++) {
-                var dataList = data.query.results.Result[i].Title;
-                var mylat = data.query.results.Result[i].Latitude;
-                var myLon = data.query.results.Result[i].Longitude;
-                var markerPostion = { lat: parseFloat(mylat), lng: parseFloat(myLon) };
-            }
-        });
-
-}
-
+// maker the marker a custom color from Udacity google maps course
 function makeMarkerIcon(markerColor) {
     var markerImage = new google.maps.MarkerImage(
         'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|' + markerColor + '|40|_|%E2%80%A2',
@@ -113,7 +91,7 @@ function makeMarkerIcon(markerColor) {
 
 
 
-
+// Initial list of locations
   var initialLocations = [{
         name: "Fort Lauderdale Beach Park",
         latLng: {
@@ -180,7 +158,7 @@ function makeMarkerIcon(markerColor) {
             lat: 26.150166,
             lng: -80.324821
         },
-        streetAddress: "Sawgrass Mills Cir",
+        streetAddress: "12801 W Sunrise Blvd",
         city: "Sunrise",
         zipcode: 33323,
         cat: "shopping",
@@ -212,9 +190,9 @@ function makeMarkerIcon(markerColor) {
         icon: defaultIcon
     }
 ];
-
+//create a custom colored marker from Udacity google maps course
 var defaultIcon = makeMarkerIcon('0091ff');
-var highlightedIcon = makeMarkerIcon('ffff24');
+//var highlightedIcon = makeMarkerIcon('ffff24');
 
 var Location = function(data) {
     //Create markers from the data
@@ -222,9 +200,11 @@ var Location = function(data) {
         title: data.name,
         position: data.latLng,
         address: data.streetAddress,
+        city: data.city,
         icon: defaultIcon,
         Animation: google.maps.Animation.DROP,
         visable: true,
+        cat: data.cat
     });
     //Create an infowindow for each location
     this.infoWindow = new google.maps.InfoWindow({ maxWidth: 400 });
@@ -252,7 +232,7 @@ var ViewModel = function() {
     var clickedItem = null;
     this.locationList = ko.observableArray([]);
     this.search = ko.observable('');
-    this.yahooQuery = ko.observableArray([]);
+    self.yahooQuery = ko.observableArray([]);
 
     //Set timeout to handle google maps error
     this.mapRequestTimeout = setTimeout(function() {
@@ -301,15 +281,15 @@ var ViewModel = function() {
           }
             locItem.toggle();
             locItem.infoWindow.open(map, locItem.marker);
+            getLocalList();
 
             clickedItem = locItem;
             map.panTo(locItem.marker.position);
             locItem.marker.setMap(map);
         });
 
-        var contentString = '<h3>' + locItem.marker.name + '</h3>' + locItem.marker.streetAddress + '<br>' + '<h3>' + locItem.marker.cat + '</h3>';
+        var contentString = '<div><h3>' + locItem.marker.title + '</h3>' + '<p>' + locItem.marker.address + '</p>' +  '<h3>' + locItem.marker.city + '</h3>'  +  '<h3>' + locItem.marker.cat + '</h3></div>';
         locItem.infoWindow.setContent(contentString);
-console.log(contentString);
         locItem.infoWindow.addListener('closeclick' , function() {
           locItem.stopToggle();
         });
@@ -318,10 +298,13 @@ console.log(contentString);
     self.bounce = function (locItem) {
     if (clickedItem !== null) {
       clickedItem.stopToggle();
+      self.yahooQuery.removeAll();
       locItem.infoWindow.close();
     }
     locItem.toggle();
     locItem.infoWindow.open(map, locItem.marker);
+    getLocalList(locItem);
+    console.log(dataList);
     clickedItem = locItem;
 
     /** pan to the clicked marker */
@@ -329,9 +312,31 @@ console.log(contentString);
     locItem.marker.setMap(map);
     };
 
+    //Get local info for the place clicked from yahoo local api
+
+    function getLocalList(locItem) {
+
+        self.yahooQuery.removeAll();
+       // var yahooRequestTimeout = setTimeout(function () {
+         // self.yahooQuery[0] ("Request failed try agian");
+        //})
+
+        var localURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20local.search%20where%20zip%3D'" + locItem.marker.zipcode + "'%20and%20query%3D'" + locItem.marker.title + "'&format=json&diagnostics=true";
+
+        $.ajax({
+                type: "GET",
+                url: localURL,
+                dataType: "jsonp",
+            })
+            .done(function(data) {
+                var len = data.query.results.Result.length;
+                for (var i = 0; i < len; i++) {
+                    var dataList = data.query.results.Result[i].Title;
+
+                }
+            });
+
+    }
 }
-
-//getLocalList(33330, "Vista View Park");
-
 
 ko.applyBindings(new ViewModel());
