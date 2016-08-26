@@ -91,7 +91,7 @@ function makeMarkerIcon(markerColor) {
 
 
 
-// Initial list of locations
+// Initial list of locations, The Model
   var initialLocations = [{
         name: "Fort Lauderdale Beach Park",
         latLng: {
@@ -168,7 +168,7 @@ function makeMarkerIcon(markerColor) {
         name: "Fort Lauderdale Hollywood Airport",
         latLng: {
             lat: 26.07428482,
-            lng: -80.15067101
+            lng:-80.15067101
         },
         streetAddress: "100 Terminal Dr",
         city: "Fort Lauderdale",
@@ -192,7 +192,7 @@ function makeMarkerIcon(markerColor) {
 ];
 //create a custom colored marker from Udacity google maps course
 var defaultIcon = makeMarkerIcon('0091ff');
-//var highlightedIcon = makeMarkerIcon('ffff24');
+
 
 var Location = function(data) {
     //Create markers from the data
@@ -288,7 +288,7 @@ var ViewModel = function() {
             locItem.marker.setMap(map);
         });
 
-        var contentString = '<div><h3>' + locItem.marker.title + '</h3>' + '<p>' + locItem.marker.address + '</p>' +  '<h3>' + locItem.marker.city + '</h3>'  +  '<h3>' + locItem.marker.cat + '</h3></div>';
+        var contentString = '<div><img border="0" align="left" src="https://www.flickr.com/photos/94639255@N00/29105332662"></div>';
         locItem.infoWindow.setContent(contentString);
         locItem.infoWindow.addListener('closeclick' , function() {
           locItem.stopToggle();
@@ -307,7 +307,7 @@ var ViewModel = function() {
     console.log(dataList);
     clickedItem = locItem;
 
-    /** pan to the clicked marker */
+    // pan to the clicked marker
     map.panTo(locItem.marker.position);
     locItem.marker.setMap(map);
     };
@@ -321,7 +321,7 @@ var ViewModel = function() {
          // self.yahooQuery[0] ("Request failed try agian");
         //})
 
-        var localURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20local.search%20where%20zip%3D'" + locItem.marker.zipcode + "'%20and%20query%3D'" + locItem.marker.title + "'&format=json&diagnostics=true";
+        var localURL = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=c9023708225bd2bb6602b8bd8d8deeb7&accuracy=1&safe_search=1&content_type=1&lat="+locItem.maker.lat+"&lon="+locItem.marker.lon +"&radius=1&per_page=10&format=json&nojsoncallback=1&auth_token=72157672966982885-0fdeadd6687c64d2&api_sig=cd881cd734eaf3195342a51299002a1a";
 
         $.ajax({
                 type: "GET",
