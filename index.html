@@ -15,8 +15,8 @@
 <body>
     <div id="map"></div>
     <div class="searchbar">
-        <form action="">
-            <input type="text" placeholder="Filter by Name">
+        <form  data-bind="submit: filter">
+            <input type="text" placeholder="Filter by Name" data-bind="value: search">
             <input type="submit" value="Search" id="submit">
         </form>
     </div>
