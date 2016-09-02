@@ -204,12 +204,15 @@ var Location = function(data) {
         icon: defaultIcon,
         Animation: google.maps.Animation.DROP,
         visable: true,
-        cat: data.cat
+        cat: data.cat,
+        lat: data.latLng.lat,
+        lng: data.latLng.lng
     });
     //Create an infowindow for each location
-    this.infoWindow = new google.maps.InfoWindow({ maxWidth: 400 });
+    this.infoWindow = new google.maps.InfoWindow({maxWidth: 300 });
 };
 
+// toggle the animation and infowindow
 Location.prototype.toggle = function() {
     if(this.marker.getAnimation() === null) {
       this.marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -219,9 +222,9 @@ Location.prototype.toggle = function() {
     this.infoWindow.open();
 };
 
-Location.prototype.stopToggle = function() {
-  this.marker.setAnimation(null);
-  this.infoWindow.close();
+ Location.prototype.stopToggle = function() {
+    this.marker.setAnimation(null);
+    this.infoWindow.close();
 };
 
 
@@ -232,7 +235,7 @@ var ViewModel = function() {
     var clickedItem = null;
     this.locationList = ko.observableArray([]);
     this.search = ko.observable('');
-    self.yahooQuery = ko.observableArray([]);
+    this.flickrImg = ko.observableArray([]);
 
     //Set timeout to handle google maps error
     this.mapRequestTimeout = setTimeout(function() {
@@ -281,14 +284,15 @@ var ViewModel = function() {
           }
             locItem.toggle();
             locItem.infoWindow.open(map, locItem.marker);
-            getLocalList();
+            getLocalFlickr();
 
             clickedItem = locItem;
             map.panTo(locItem.marker.position);
             locItem.marker.setMap(map);
         });
 
-        var contentString = '<div><img border="0" align="left" src="https://www.flickr.com/photos/94639255@N00/29105332662"></div>';
+        var contentString = '<div id="infowindow">' + '<img src="https://www.flickr.com/photos/94639255@N00/29105332662">' +
+        '<h3>' + locItem.marker.title + '</h3>' + '</div>';
         locItem.infoWindow.setContent(contentString);
         locItem.infoWindow.addListener('closeclick' , function() {
           locItem.stopToggle();
@@ -298,30 +302,29 @@ var ViewModel = function() {
     self.bounce = function (locItem) {
     if (clickedItem !== null) {
       clickedItem.stopToggle();
-      self.yahooQuery.removeAll();
+      self.flickrImg.removeAll();
       locItem.infoWindow.close();
     }
     locItem.toggle();
     locItem.infoWindow.open(map, locItem.marker);
-    getLocalList(locItem);
-    console.log(dataList);
+    getLocalFlickr(locItem);
     clickedItem = locItem;
 
-    // pan to the clicked marker
+    // pan to the  marker
     map.panTo(locItem.marker.position);
     locItem.marker.setMap(map);
     };
 
     //Get local info for the place clicked from yahoo local api
 
-    function getLocalList(locItem) {
+    function getLocalFlickr(locItem) {
 
-        self.yahooQuery.removeAll();
+        self.flickrImg.removeAll();gh
        // var yahooRequestTimeout = setTimeout(function () {
          // self.yahooQuery[0] ("Request failed try agian");
         //})
-
-        var localURL = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=c9023708225bd2bb6602b8bd8d8deeb7&accuracy=1&safe_search=1&content_type=1&lat="+locItem.maker.lat+"&lon="+locItem.marker.lon +"&radius=1&per_page=10&format=json&nojsoncallback=1&auth_token=72157672966982885-0fdeadd6687c64d2&api_sig=cd881cd734eaf3195342a51299002a1a";
+            console.log(locItem.marker.lat);
+        var flickrURL = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=c9023708225bd2bb6602b8bd8d8deeb7&accuracy=1&safe_search=1&content_type=1&lat=" + locItem.marker.lat + "&lon=" + locItem.marker.lon + "&radius=1&per_page=10&format=json&auth_token=72157672966982885-0fdeadd6687c64d2&api_sig=cd881cd734eaf3195342a51299002a1a";
 
         $.ajax({
                 type: "GET",
@@ -329,7 +332,7 @@ var ViewModel = function() {
                 dataType: "jsonp",
             })
             .done(function(data) {
-                var len = data.query.results.Result.length;
+                var len = data.photos.photo.length;
                 for (var i = 0; i < len; i++) {
                     var dataList = data.query.results.Result[i].Title;
 
