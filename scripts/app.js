@@ -77,7 +77,6 @@ var styles = [{
     }]
 }];
 
-
 // make the marker a custom color from Udacity google maps course
 function makeMarkerIcon(markerColor) {
     var markerImage = new google.maps.MarkerImage(
@@ -89,8 +88,6 @@ function makeMarkerIcon(markerColor) {
     return markerImage;
 }
 
-
-
 // Initial list of locations, The Model
 var initialLocations = [{
     name: "Fort Lauderdale Beach Park",
@@ -98,9 +95,6 @@ var initialLocations = [{
         lat: 26.1120152,
         lng: -80.1048193
     },
-    streetAddress: "1100 Seabreaze Blvd",
-    city: "Fort Lauderdale",
-    zipcode: 33316,
     tags: "ft lauderdale beach",
     visible: true,
     icon: defaultIcon
@@ -110,10 +104,7 @@ var initialLocations = [{
         lat: 26.1296413,
         lng: -80.3545787
     },
-    streetAddress: "16001 W State Rd 84",
-    city: "Sunrise",
-    zipcode: 33326,
-    tags: "mountain biking",
+    tags: "everglades",
     visible: true,
     icon: defaultIcon
 }, {
@@ -122,9 +113,6 @@ var initialLocations = [{
         lat: 26.070546,
         lng: -80.342975
     },
-    streetAddress: "4001 SW 142nd Ave",
-    city: "Davie",
-    zipcode: 33330,
     tags: "vista view park",
     visible: true,
     icon: defaultIcon
@@ -134,10 +122,7 @@ var initialLocations = [{
         lat: 26.097359,
         lng: -80.381417
     },
-    streetAddress: "1721 Main St",
-    city: "Weston",
-    zipcode: 33326,
-    tags: " garciano empanada",
+    tags: " argentina steak house",
     visible: true,
     icon: defaultIcon
 }, {
@@ -146,10 +131,7 @@ var initialLocations = [{
         lat: 26.1033643,
         lng: -80.2706109
     },
-    streetAddress: "9100 W State Rd",
-    city: "Davie",
-    zipcode: 33324,
-    tags: "vienna cafe",
+    tags: "european food",
     visible: true,
     icon: defaultIcon
 }, {
@@ -158,10 +140,7 @@ var initialLocations = [{
         lat: 26.150166,
         lng: -80.324821
     },
-    streetAddress: "12801 W Sunrise Blvd",
-    city: "Sunrise",
-    zipcode: 33323,
-    tags: "sawgrass mall",
+    tags: "mall shopping",
     visible: true,
     icon: defaultIcon
 }, {
@@ -170,9 +149,6 @@ var initialLocations = [{
         lat: 26.07428482,
         lng: -80.15067101
     },
-    streetAddress: "100 Terminal Dr",
-    city: "Fort Lauderdale",
-    zipcode: 33315,
     tags: "ft lauderdale airport",
     visible: true,
     icon: defaultIcon
@@ -182,9 +158,6 @@ var initialLocations = [{
         lat: 26.00470497,
         lng: -80.33688068
     },
-    streetAddress: "527 SW 145th Terrace",
-    city: "Pembroke Pines",
-    zipcode: 33027,
     tags: "shops at pembroke gardens",
     visible: true,
     icon: defaultIcon
@@ -192,14 +165,11 @@ var initialLocations = [{
 //create a custom colored marker from Udacity google maps course
 var defaultIcon = makeMarkerIcon('0091ff');
 
-
 var Location = function (data) {
     //Create markers from the data
     this.marker = new google.maps.Marker({
         title: data.name,
         position: data.latLng,
-        address: data.streetAddress,
-        city: data.city,
         icon: defaultIcon,
         Animation: google.maps.Animation.DROP,
         visible: true,
@@ -207,9 +177,10 @@ var Location = function (data) {
         lat: data.latLng.lat,
         lng: data.latLng.lng
     });
+
     //Create an infowindow for each location
     this.infoWindow = new google.maps.InfoWindow({
-        maxWidth: 300
+        maxWidth: 200
     });
 };
 
@@ -217,27 +188,28 @@ var Location = function (data) {
 Location.prototype.toggle = function () {
     if (this.marker.getAnimation() === null) {
         this.marker.setAnimation(google.maps.Animation.BOUNCE);
+        
     } else {
         this.marker.setAnimation(null);
     }
+    
     this.infoWindow.open();
 };
 
 Location.prototype.stopToggle = function () {
     this.marker.setAnimation(null);
     this.infoWindow.close();
+    
 };
-
 
 var ViewModel = function () {
 
     var self = this;
     var map;
     var clickedItem = null;
-    var flickrSrc = " ";
     self.locationList = ko.observableArray([]);
     self.search = ko.observable('');
-    self.flickrImg = ko.observableArray([]);
+    
 
     //Set timeout to handle google maps error
     this.mapRequestTimeout = setTimeout(function () {
@@ -245,13 +217,12 @@ var ViewModel = function () {
     }, 8000);
 
 
-
-
+    // Take each initial location and push it to locationList
     initialLocations.forEach(function (locationItem) {
         self.locationList.push(new Location(locationItem));
-
     });
 
+    // Get map from google.maps
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 10,
         styles: styles,
@@ -259,7 +230,9 @@ var ViewModel = function () {
             lat: 26.1033643,
             lng: -80.2706109
         },
-        mapTypeControl: false
+        mapTypeControl: false,
+        zoomControl: false,
+        disableDoubleClickZoom: true
     });
 
     //clear timeout once map has rendered
@@ -272,14 +245,16 @@ var ViewModel = function () {
         map.setZoom(10);
     };
 
+    // If window is re-sized  re-center the map
     google.maps.event.addDomListener(window, "resize", function () {
         center = map.getCenter();
         google.maps.event.trigger(map, "resize");
         map.setCenter(center);
     });
 
+    // Add location marker and event listener for each location
     self.locationList().forEach(function (locItem) {
-
+        
         locItem.marker.setMap(map);
 
         locItem.marker.addListener('click', function () {
@@ -290,29 +265,31 @@ var ViewModel = function () {
             locItem.toggle();
             locItem.infoWindow.open(map, locItem.marker);
             getLocalFlickr(locItem);
-
+            
             clickedItem = locItem;
             map.panTo(locItem.marker.position);
             locItem.marker.setMap(map);
         });
-
+         
         var contentString = '<div id="iw-contianer">' +
-            '<header class="iw-title">' + '<h3>' + locItem.marker.title + '</h3>' + '</header>' + flickrSrc + '</div>';
+            '<header class="iw-title">' + '<h3>' + locItem.marker.title + '</h3>' + '</header></div>';
+        
         locItem.infoWindow.setContent(contentString);
-        //console.log(contentString);
+       
 
         locItem.infoWindow.addListener('closeclick', function () {
             locItem.stopToggle();
-            self.flickrImg.removeAll();
+            $("#iw-contianer > img").remove();
         });
     });
 
     self.bounce = function (locItem) {
         if (clickedItem !== null) {
             clickedItem.stopToggle();
-            self.flickrImg.removeAll();
+            $("#iw-contianer > img").remove();
             locItem.infoWindow.close();
         }
+
         locItem.toggle();
         locItem.infoWindow.open(map, locItem.marker);
         getLocalFlickr(locItem);
@@ -324,45 +301,23 @@ var ViewModel = function () {
     };
 
     //Get local img for the place clicked from flickr api
-
     function getLocalFlickr(locItem) {
-
-        self.flickrImg.removeAll();
-        //console.log(locItem.marker.lat);
-        //console.log(locItem.marker.lng);
     
-        //flickrURL = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=fc762e4eaace125f6f9cccf69fc6d5b2&accuracy=1&safe_search=1&privacy_filter=1&accuracy=16&content_type=1&lat=" + locItem.marker.lat + "&lon=" + locItem.marker.lng + "&radius=1&radius_unit=km&per_page=10&//format=json&jsoncallback=?";
         var flickerAPI = "http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?";
         $.getJSON(flickerAPI,{
                 tags: locItem.marker.tags,
                 tagmode: "any",
                 format: "json"
-                
             })
             .done(function (data) {
-                //console.log(data);
-                //var len = data.photos.photo.length;
-                //for (var i = 0; i < len; i++) {
-                    //var imgListId = data.photos.photo[2].id;
-                    //var imgListOwner = data.photos.photo[2].owner;
-                    //console.log(imgListId);
-                    //console.log(imgListId);
-                    //flickrSrc = '<img src="https://www.flickr.com/photos/' + imgListOwner + '/' + imgListId + '" >'
-                    //console.log(flikrSrc);
-                    //$.each(data.photos.photo, function(i, item){
-                        //console.log(item.id);
-                        //console.log(item.owner);
-                        //var flickrImgSrc ="https://www.flickr.com/photos/"+item.owner+"/"+item.id;
-                        var flickrImgsrc = data.items[5].media.m;
-                        $("<img>").attr("src",flickrImgsrc).appendTo("#iw-contianer");
-                        //if (i == 0) {
-                            //return false;
-                        //}
-                    //})
-            }) 
-                
-            
-            
+                    var flickrImgsrc = data.items[1].media.m;
+                    $("#iw-contianer > img").remove();
+                    $("<img>").attr("src",flickrImgsrc).appendTo("#iw-contianer");
+                })  
+
+            .fail(function(jqXHR, textStatus, errorThrown) {
+            $('<h3>Request for Flickr resources failed. Please re-load page</h3>').appendTo("#iw-contianer");
+        }); 
     }
 
     self.filter = function () {
@@ -373,7 +328,7 @@ var ViewModel = function () {
                 locItem.stopToggle();
                 locItem.marker.setVisible(false);
                 if (locItem == clickedItem) {
-                    self.flickrImg.removeAll();
+                    $("#iw-contianer > img").remove();
                 }
             }
         });
