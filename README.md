@@ -18,11 +18,11 @@ Click on a marker to see the location.
 
 ## Resources
 ---
--Jquery documentation
--Udacity Intro to Ajax, Javascript design patterns, and Google Maps APIs courses
--Knockout.js documentation
--stackoverflow.com to find answers to questions
--Google maps documentation
+- Jquery documentation
+- Udacity Intro to Ajax, Javascript design patterns, and Google Maps APIs courses
+- Knockout.js documentation
+- stackoverflow.com to find answers to questions
+- Google maps documentation
 
 
 
