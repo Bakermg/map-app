@@ -18,6 +18,9 @@ body {
     right: 0px;
 }
 
+/*span {
+  padding: 12px 24px;
+}*/
 .searchbtn, .locbtn {
   display: none;
   color: black;
@@ -73,6 +76,8 @@ body {
   background: rgba(255,255,255, 0.6);
   width: 25%;
   border: 1px solid gray;
+  max-height: 100%;
+  overflow: scroll;
 }
 
 .results-list {

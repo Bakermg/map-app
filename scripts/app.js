@@ -77,16 +77,21 @@ var styles = [{
     }]
 }];
 
-// make the marker a custom color from Udacity google maps course
-function makeMarkerIcon(markerColor) {
-    var markerImage = new google.maps.MarkerImage(
-        'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|' + markerColor + '|40|_|%E2%80%A2',
-        new google.maps.Size(21, 34),
-        new google.maps.Point(0, 0),
-        new google.maps.Point(10, 34),
-        new google.maps.Size(21, 34));
-    return markerImage;
-}
+
+var map;
+var initMap = function() {
+
+ map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 10,
+        styles: styles,
+        center: {
+            lat: 26.1033643,
+            lng: -80.2706109
+        },
+        mapTypeControl: false,
+        zoomControl: false,
+        disableDoubleClickZoom: true
+    });
 
 // Initial list of locations, The Model
 var initialLocations = [{
@@ -162,6 +167,8 @@ var initialLocations = [{
     visible: true,
     icon: defaultIcon
 }];
+
+ 
 //create a custom colored marker from Udacity google maps course
 var defaultIcon = makeMarkerIcon('0091ff');
 
@@ -203,40 +210,15 @@ Location.prototype.stopToggle = function () {
 };
 
 var ViewModel = function () {
-
     var self = this;
-    var map;
     var clickedItem = null;
     self.locationList = ko.observableArray([]);
     self.search = ko.observable('');
-    
-
-    //Set timeout to handle google maps error
-    this.mapRequestTimeout = setTimeout(function () {
-        $('#map').html('Google Maps failed to load Please refresh your browser.');
-    }, 8000);
-
 
     // Take each initial location and push it to locationList
     initialLocations.forEach(function (locationItem) {
         self.locationList.push(new Location(locationItem));
     });
-
-    // Get map from google.maps
-    map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 10,
-        styles: styles,
-        center: {
-            lat: 26.1033643,
-            lng: -80.2706109
-        },
-        mapTypeControl: false,
-        zoomControl: false,
-        disableDoubleClickZoom: true
-    });
-
-    //clear timeout once map has rendered
-    clearTimeout(self.mapRequestTimeout);
 
     //Map center button function to get back to center
     this.centerMap = function () {
@@ -333,12 +315,29 @@ var ViewModel = function () {
             }
         });
 
-        var visableList = ko.observable(self.locationList());
+        var visibleList = ko.observable(self.locationList());
         self.locationList([]);
-        for (var i = 0; i < visableList().length; i++) {
-            self.locationList.push(visableList()[i]);
+        for (var i = 0; i < visibleList().length; i++) {
+            self.locationList.push(visibleList()[i]);
         }
-    };
+    }
+};
+
+// make the marker a custom color from Udacity google maps course
+function makeMarkerIcon(markerColor) {
+    var markerImage = new google.maps.MarkerImage(
+        'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|' + markerColor + '|40|_|%E2%80%A2',
+        new google.maps.Size(21, 34),
+        new google.maps.Point(0, 0),
+        new google.maps.Point(10, 34),
+        new google.maps.Size(21, 34));
+    return markerImage;
 }
 
 ko.applyBindings(new ViewModel());
+};
+
+var nonsuccess = function() {
+    $('#map').html('Google Maps failed to load Please refresh your browser.');
+};
+
